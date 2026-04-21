@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #F8F9FA;
+  color: #0A2D34;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Subtle gold top-border motif for "platform mode" cards */
+.platform-card {
+  position: relative;
+}
+.platform-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 12px; right: 12px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #C9A961 50%, transparent);
+  border-radius: 2px;
+}
+
+/* Scrollbar styling for transaction feed */
+.feed-scroll::-webkit-scrollbar { width: 6px; }
+.feed-scroll::-webkit-scrollbar-thumb {
+  background: rgba(14, 59, 67, 0.15);
+  border-radius: 3px;
+}
