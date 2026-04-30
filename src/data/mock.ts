@@ -218,6 +218,38 @@ export function seedTxnFeed(size = 12): Txn[] {
   return out
 }
 
+// Single-property variants used by the Franchisee LiveFeed.
+// Cadence is fixed (not GTV-weighted) so small properties still feel alive.
+export function generateTxnFor(propertyId: string, now: Date = new Date()): Txn {
+  const property = properties.find(p => p.id === propertyId) ?? properties[0]
+  const channel = weightedPick(channelMix.map(c => c.name), channelWeights, 1)
+  const band = Math.random()
+  let amount: number
+  if      (band < 0.55) amount = Math.round(40  + Math.random() * 900)
+  else if (band < 0.85) amount = Math.round(900 + Math.random() * 4_100)
+  else if (band < 0.97) amount = Math.round(5_000 + Math.random() * 8_000)
+  else                  amount = Math.round(12_000 + Math.random() * 18_000)
+  const success = Math.random() > 0.01
+  return {
+    id: ++txnCounter,
+    ts: formatHMS(now),
+    property,
+    amount,
+    channel,
+    success,
+  }
+}
+
+export function seedTxnFeedFor(propertyId: string, size = 12): Txn[] {
+  const out: Txn[] = []
+  const base = new Date()
+  for (let i = 0; i < size; i++) {
+    const t = new Date(base.getTime() - i * 3_200)
+    out.push(generateTxnFor(propertyId, t))
+  }
+  return out
+}
+
 // ─────────────────────────────────────────────────────────────
 // Per-property 30-day GTV trend (used on drill-down)
 

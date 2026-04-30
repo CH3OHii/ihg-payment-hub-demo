@@ -1,17 +1,36 @@
 import { useEffect, useState } from 'react'
 import { AnimatePresence, motion } from 'framer-motion'
 import Card from '../../components/Card'
-import { generateTxn, seedTxnFeed, type Txn } from '../../data/mock'
+import {
+  generateTxn,
+  generateTxnFor,
+  seedTxnFeed,
+  seedTxnFeedFor,
+  type Txn,
+} from '../../data/mock'
 import { useMode } from '../../state/ModeContext'
 import { formatCNYExact } from '../../lib/format'
 import { CheckCircle2 } from 'lucide-react'
 
 const MAX_ROWS = 14
 
-export default function LiveFeed() {
+interface LiveFeedProps {
+  propertyId?: string  // when set, stream only that property's txns
+  title?: string
+  subtitle?: string
+}
+
+export default function LiveFeed({ propertyId, title, subtitle }: LiveFeedProps = {}) {
   const { mode } = useMode()
   const platform = mode === 'platform'
-  const [feed, setFeed] = useState<Txn[]>(() => seedTxnFeed(10))
+  const [feed, setFeed] = useState<Txn[]>(() =>
+    propertyId ? seedTxnFeedFor(propertyId, 10) : seedTxnFeed(10)
+  )
+
+  // When the propertyId changes (franchisee switches property), reseed the feed.
+  useEffect(() => {
+    setFeed(propertyId ? seedTxnFeedFor(propertyId, 10) : seedTxnFeed(10))
+  }, [propertyId])
 
   // Stream new txns only in Platform mode. Interval 1000-1800ms for a lively-but-readable cadence.
   useEffect(() => {
@@ -20,7 +39,12 @@ export default function LiveFeed() {
 
     const tick = () => {
       setFeed(prev => {
-        const next = [generateTxn(new Date()), ...prev]
+        const next = [
+          propertyId
+            ? generateTxnFor(propertyId, new Date())
+            : generateTxn(new Date()),
+          ...prev,
+        ]
         if (next.length > MAX_ROWS) next.length = MAX_ROWS
         return next
       })
@@ -28,7 +52,7 @@ export default function LiveFeed() {
     }
     timeout = window.setTimeout(tick, 1200)
     return () => window.clearTimeout(timeout)
-  }, [platform])
+  }, [platform, propertyId])
 
   if (!platform) {
     // Current State: show a stale batch — yesterday's end-of-day export, frozen.
@@ -36,8 +60,8 @@ export default function LiveFeed() {
     const stale = feed.slice(0, 10)
     return (
       <Card
-        title="Transaction Log"
-        subtitle="End-of-day batch · 3 properties missing"
+        title={title ?? 'Transaction Log'}
+        subtitle={subtitle ?? 'End-of-day batch · 3 properties missing'}
         right={
           <div className="flex items-center gap-1.5 text-[11px] text-warn">
             <span className="w-1.5 h-1.5 rounded-full bg-warn" />
@@ -75,8 +99,8 @@ export default function LiveFeed() {
 
   return (
     <Card
-      title="Live Transaction Feed"
-      subtitle="All 612 properties · streaming"
+      title={title ?? 'Live Transaction Feed'}
+      subtitle={subtitle ?? 'All 612 properties · streaming'}
       right={
         <div className="flex items-center gap-1.5 text-[11px] text-success">
           <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulseDot" />
