@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react'
 import { useMode } from '../state/ModeContext'
 import { Hotel } from 'lucide-react'
+import PersonaToggle from './PersonaToggle'
+import PropertyPicker from './PropertyPicker'
 
 export default function TopBar() {
-  const { mode, toggleMode } = useMode()
+  const { mode, toggleMode, persona } = useMode()
   const isPlatform = mode === 'platform'
+  const isFranchisee = persona === 'franchisee'
 
   // Simulated "updated X seconds ago" ticker in Platform mode.
   const [agoTick, setAgoTick] = useState(0)
@@ -16,18 +19,26 @@ export default function TopBar() {
 
   return (
     <header className="h-16 bg-navy text-offwhite border-b border-navy-mid/50 flex items-center justify-between px-6 shrink-0">
-      <div className="flex items-center gap-3">
-        <div className="w-9 h-9 rounded-full bg-gold flex items-center justify-center text-navy-dark">
-          <Hotel size={18} strokeWidth={2.3} />
-        </div>
-        <div className="leading-tight">
-          <div className="font-serif text-[17px] tracking-wide">
-            IHG Greater China · <span className="text-gold">Payment Hub</span>
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-9 h-9 rounded-full bg-gold flex items-center justify-center text-navy-dark">
+            <Hotel size={18} strokeWidth={2.3} />
           </div>
-          <div className="text-[11px] uppercase tracking-[0.18em] text-offwhite/60">
-            Treasury View
+          <div className="leading-tight">
+            <div className="font-serif text-[17px] tracking-wide">
+              IHG Greater China · <span className="text-gold">Payment Hub</span>
+            </div>
+            {isFranchisee ? (
+              <PropertyPicker />
+            ) : (
+              <div className="text-[11px] uppercase tracking-[0.18em] text-offwhite/60">
+                Treasury View
+              </div>
+            )}
           </div>
         </div>
+
+        <PersonaToggle />
       </div>
 
       <div className="flex items-center gap-5">
